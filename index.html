@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Speech Recognition Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: black;
+      color: white;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center; /* Center align content vertically */
+      justify-content: center; /* Center align content horizontally */
+      height: 100vh;
+    }
+
+    h1 {
+      color: #fffbfb;
+    }
+
+    #start-listening-btn {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    #start-listening-btn:hover {
+      background-color: #45a049;
+    }
+
+    #answer-container {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #fff;
+      border-radius: 4px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .user-message {
+      color: #333;
+      font-weight: bold;
+    }
+
+    .gpt-message {
+      color: #666;
+    }
+
+      /* Responsive styles */
+      @media only screen and (max-width: 600px) {
+      h1 {
+        font-size: 24px;
+      }
+
+      #start-listening-btn {
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Speech Recognition Test</h1>
+  <button id="start-listening-btn">Start Listening</button>
+  <div id="answer-container"></div> <!-- Added a container to display the answer -->
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+  <script>
+    const apiUrl = "https://api.openai.com/v1/chat/completions";
+
+    async function getChatGptResponse(prompt) {
+      try {
+        const response = await axios.post(
+          apiUrl,
+          {
+            model: 'gpt-3.5-turbo',
+            messages: [{ role: "system", content: prompt }],
+          },
+          {
+            headers: {
+              'Authorization': 'Bearer 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', // Replace with your actual API key
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+        console.error("response", response);
+        return response.data.choices[0].message.content;
+      } catch (error) {
+        console.log("API Error:", error.message);
+        return "Error: Failed to fetch response from ChatGPT.";
+      }
+    }
+
+    let transcript = '';
+    let conversation = ''; // Variable to store the conversation history
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const startBtn = document.getElementById('start-listening-btn');
+      const recognition = new webkitSpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+
+      startBtn.addEventListener('click', function() {
+        recognition.start();
+        location.reload();
+      });
+      
+
+      var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;
+      var recognition1 = new SpeechRecognition();
+      var transcript = ''; // Variable to store the continuous speech input
+
+      recognition1.onstart = function() {
+        console.log("We are listening. Try speaking into the microphone.");
+      };
+      recognition1.onspeechend = function() {
+        // When the user is done speaking
+        recognition1.stop();
+      };
+
+      recognition1.onresult = async function(event) {
+        const results = event.results;
+        const latestTranscript = results[results.length - 1][0].transcript;
+        transcript += ' ' + latestTranscript.trim();
+        displayUserMessage(latestTranscript); // Display the user's speech in real-time
+        const answer = await getChatGptResponse(transcript);
+        console.log("answer :", answer);
+        displayAnswer(latestTranscript, answer); // Call a function to handle the transcript and answer
+      };
+
+      // Start recognition automatically when the page is loaded
+      recognition1.start();
+
+      function displayUserMessage(userMessage) {
+        // Display the user's message in real-time
+        conversation += '<p class="user-message">' + userMessage + '</p>';
+
+        // Update the HTML content with the conversation
+        const answerContainer = document.getElementById('answer-container');
+        answerContainer.innerHTML = conversation;
+      }
+
+      function displayAnswer(userMessage, gptMessage) {
+        // Append the GPT's message to the conversation
+        conversation += '<p class="gpt-message">' + gptMessage + '</p>';
+
+        // Update the HTML content with the conversation
+        const answerContainer = document.getElementById('answer-container');
+        answerContainer.innerHTML = conversation;
+      }
+    });
+
+    
+  </script>
+</body>
+</html>
