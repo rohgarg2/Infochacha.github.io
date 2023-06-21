@@ -19,7 +19,14 @@
     h1 {
       color: #fffbfb;
     }
-
+ p {
+      color: #aec53a;
+      word-wrap: break-word;
+      text-align: center; /* Center align the paragraph content */
+      max-width: 600px; /* Set a maximum width to limit the paragraph's width */
+      margin: 20px 0; /* Add some margin for spacing */
+    }
+    
     #start-listening-btn {
       background-color: #4CAF50;
       color: white;
@@ -64,7 +71,8 @@
   </style>
 </head>
 <body>
-  <h1>Speech Recognition Test</h1>
+  <h1>Speech Recognition</h1>
+  <p>Experience the power of speech recognition: effortlessly convert your spoken words into written text, enabling seamless hands-free communication and enhanced productivity.</p>
   <button id="start-listening-btn">Start Listening</button>
   <div id="answer-container"></div> <!-- Added a container to display the answer -->
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
